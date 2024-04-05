@@ -1,21 +1,21 @@
 using Base, GLMakie, GeometryBasics, Observables, LinearAlgebra
 
 Base.@kwdef mutable struct LargeParticleMethod
-    N::Int64 = 30
-    M::Int64 = 30
-    v::Array{Float64, 3} # velocity 
-    E::Array{Float64, 2} # energy
-    ρ::Array{Float64, 2} # density
-    P::Array{Float64, 2} # pressure
-    v_n::Array{Float64, 3} # new value of velocity 
-    E_n::Array{Float64, 2} # new value of energy
-    ρ_n::Array{Float64, 2} # new value of density
-    dx::Float64 = 0.1
-    dy::Float64 = 0.1
-    dt::Float64 = 0.01
+    N::Integer = 30
+    M::Integer = 30
+    v::Array{AbstractFloat, 3} # velocity 
+    E::Array{AbstractFloat, 2} # energy
+    ρ::Array{AbstractFloat, 2} # density
+    P::Array{AbstractFloat, 2} # pressure
+    v_n::Array{AbstractFloat, 3} # new value of velocity 
+    E_n::Array{AbstractFloat, 2} # new value of energy
+    ρ_n::Array{AbstractFloat, 2} # new value of density
+    dx::AbstractFloat = 0.1
+    dy::AbstractFloat = 0.1
+    dt::AbstractFloat = 0.01
     x
     y
-    g::Float64  = 1.4 # adiabata number
+    g::AbstractFloat  = 1.4 # adiabata number
 end
 
 # Animation function
@@ -173,7 +173,7 @@ function step!(lpm::LargeParticleMethod)
   return lpm.x, lpm.y, lpm.ρ
 end
 
-function run_simulation(N, M, dx, dt)
+function run_simulation(N::Integer, M::Integer, dx::AbstractFloat, dt::AbstractFloat)
 
     GLMakie.activate!()
     # Create plot
