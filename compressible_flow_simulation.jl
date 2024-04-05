@@ -49,26 +49,27 @@ function step!(lpm::LargeParticleMethod)
  
     # Computing the pressure
     for j in 2:lpm.M-1, i in 2:lpm.N-1
-        lpm.P[i,j] = lpm.ρ[i,j]*(lpm.g-1).*(lpm.E[i,j]-.5*(lpm.v[i,j,1].^2+lpm.v[i,j,2].^2));
+        lpm.P[i,j] = lpm.ρ[i,j] * (lpm.g-1) * (lpm.E[i,j]- 0.5(lpm.v[i,j,1]^2 + lpm.v[i,j,2]^2));
     end
 
     # Computing Euler's stage
     for j in 2:lpm.M-1, i in 2:lpm.N-1
         P0  = lpm.P[i,j];
-        PL  = .5*(P0+lpm.P[i-1,j]);
-        PP  = .5*(P0+lpm.P[i+1,j]);    
-        PN  = .5*(P0+lpm.P[i,j-1]);
-        PV  = .5*(P0+lpm.P[i,j+1]);
+        PL  = 0.5(P0 + lpm.P[i-1,j]);
+        PP  = 0.5(P0 + lpm.P[i+1,j]);    
+        PN  = 0.5(P0 + lpm.P[i,j-1]);
+        PV  = 0.5(P0 + lpm.P[i,j+1]);
         U01 = lpm.v[i,j,1];
         U02 = lpm.v[i,j,2];
-        UL1 = .5*(U01+lpm.v[i-1,j,1]);
-        UP1 = .5*(U01+lpm.v[i+1,j,1]);
-        UN  = .5*(U02+lpm.v[i,j-1,2]);
-        UV2 = .5*(U02+lpm.v[i,j+1,2]);
+        UL1 = 0.5(U01 + lpm.v[i-1,j,1]);
+        UP1 = 0.5(U01 + lpm.v[i+1,j,1]);
+        UN  = 0.5(U02 + lpm.v[i,j-1,2]);
+        UV2 = 0.5(U02 + lpm.v[i,j+1,2]);
         # computing intermediate values of velocities and total energy
-        lpm.v_n[i,j,1] = lpm.v[i,j,1]+(PL-PP)*lpm.dt/(lpm.dx*lpm.ρ[i,j]);
-        lpm.v_n[i,j,2] = lpm.v[i,j,2]+(PN-PV)*lpm.dt/(lpm.dy*lpm.ρ[i,j]);
-        lpm.E_n[i,j]   = lpm.E[i,j]+(PL*UL1-PP*UP1)*lpm.dt/(lpm.dx*lpm.ρ[i,j])+(PN*UN-PV*UV2)*lpm.dt/(lpm.dy*lpm.ρ[i,j]);
+        lpm.v_n[i,j,1] = lpm.v[i,j,1] + (PL - PP)*lpm.dt/(lpm.dx*lpm.ρ[i,j]);
+        lpm.v_n[i,j,2] = lpm.v[i,j,2] + (PN - PV)*lpm.dt/(lpm.dy*lpm.ρ[i,j]);
+        lpm.E_n[i,j]   = lpm.E[i,j] + (PL*UL1 - PP*UP1)*lpm.dt/(lpm.dx*lpm.ρ[i,j]) 
+                                    + (PN*UN - PV*UV2)*lpm.dt/(lpm.dy*lpm.ρ[i,j]);
     end
 
     # Defining boundary values before Lagrange stage
@@ -86,7 +87,7 @@ function step!(lpm::LargeParticleMethod)
     for i in 1:lpm.N
       # lower boundary
       lpm.v_n[i,1,1] = lpm.v_n[i,2,1];
-      lpm.v_n[i,1,2] = -lpm.v_n[i,2,2];
+      lpm.v_n[i,1,2] =-lpm.v_n[i,2,2];
       lpm.E_n[i,1]   = lpm.E_n[i,2];
       # upper boundary
       lpm.v_n[i,lpm.M,1] = lpm.v_n[i,lpm.M-1,1];
@@ -100,10 +101,10 @@ function step!(lpm::LargeParticleMethod)
         ρ0  = lpm.ρ[i,j];
         U10 = lpm.v_n[i,j,1];
         U20 = lpm.v_n[i,j,2];
-        UL  = .5*(U10+lpm.v_n[i-1,j,1]);
-        UP  = .5*(U10+lpm.v_n[i+1,j,1]);
-        UN  = .5*(U20+lpm.v_n[i,j-1,2]);
-        UV  = .5*(U20+lpm.v_n[i,j+1,2]);
+        UL  = 0.5(U10 + lpm.v_n[i-1,j,1]);
+        UP  = 0.5(U10 + lpm.v_n[i+1,j,1]);
+        UN  = 0.5(U20 + lpm.v_n[i,j-1,2]);
+        UV  = 0.5(U20 + lpm.v_n[i,j+1,2]);
         # defining direction of the velocity and computing flows of mass...
         # through the left border of the cell
         if UL <= 0.0
@@ -143,21 +144,21 @@ function step!(lpm::LargeParticleMethod)
         AM3 = abs(DM3);
         AM4 = abs(DM4);
         Z1  = lpm.dy*lpm.dx;
-        Z2  = (D1-0.5)*AM1+(D2-0.5)*AM+(D3-0.5)*AM3+(D4-0.5)*AM4;
+        Z2  = (D1 - 0.5)*AM1 + (D2 - 0.5)*AM + (D3 - 0.5)*AM3 + (D4 - 0.5)*AM4;
 
         # computing the final value of the density
-        lpm.ρ_n[i,j] = ρ0+2.0*Z2/Z1;
-        Z3 = ρ0*Z1-(1.0-D1)*AM1-(1.0-D2)*AM-(1.0-D3)*AM3-(1.0-D4)*AM4;
+        lpm.ρ_n[i,j] = ρ0 + 2.0*Z2/Z1;
+        Z3 = ρ0*Z1 - (1.0 - D1)*AM1 - (1.0 - D2)*AM - (1.0 - D3)*AM3 - (1.0 - D4)*AM4;
         Z4 = lpm.ρ_n[i,j]*Z1;
         B1 = D1*AM1;
         B2 = D2*AM;
         B3 = D3*AM3;
         B4 = D4*AM4;
         # computing final values of the components of the speed
-        lpm.v[i,j,1] = (U10*Z3+lpm.v_n[i-1,j,1]*B1+lpm.v_n[i,j-1,1]*B2+lpm.v_n[i+1,j,1]*B3+lpm.v_n[i,j+1,1]*B4)/Z4;
-        lpm.v[i,j,2] = (U20*Z3+lpm.v_n[i-1,j,2]*B1+lpm.v_n[i,j-1,2]*B2+lpm.v_n[i+1,j,2]*B3+lpm.v_n[i,j+1,2]*B4)/Z4;
+        lpm.v[i,j,1] = (U10*Z3 + lpm.v_n[i-1,j,1]*B1 + lpm.v_n[i,j-1,1]*B2 + lpm.v_n[i+1,j,1]*B3 + lpm.v_n[i,j+1,1]*B4)/Z4;
+        lpm.v[i,j,2] = (U20*Z3 + lpm.v_n[i-1,j,2]*B1 + lpm.v_n[i,j-1,2]*B2 + lpm.v_n[i+1,j,2]*B3 + lpm.v_n[i,j+1,2]*B4)/Z4;
         # computing the final value of the total energy
-        lpm.E[i,j]   = (lpm.E_n[i,j]*Z3+lpm.E_n[i-1,j]*B1+lpm.E_n[i,j-1]*B2+lpm.E_n[i+1,j]*B3+lpm.E_n[i,j+1]*B4)/Z4;
+        lpm.E[i,j]   = (lpm.E_n[i,j]*Z3 + lpm.E_n[i-1,j]*B1 + lpm.E_n[i,j-1]*B2 + lpm.E_n[i+1,j]*B3 + lpm.E_n[i,j+1]*B4)/Z4;
       end
     end
 
