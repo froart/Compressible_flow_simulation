@@ -20,7 +20,7 @@ end
 
 # Animation function
 function step!(lpm::LargeParticleMethod)
-    #### MOD2 ####
+    # Defining boundary values
     for j in 1:lpm.M
         # left boundary
         lpm.ρ[1,j]   = lpm.ρ[2,j];
@@ -47,14 +47,12 @@ function step!(lpm::LargeParticleMethod)
         lpm.E[i,lpm.M]   = lpm.E[i,lpm.M-1];
     end
  
-    #### MOD4 ####
-    # computing the pressure
+    # Computing the pressure
     for j in 2:lpm.M-1, i in 2:lpm.N-1
         lpm.P[i,j] = lpm.ρ[i,j]*(lpm.g-1).*(lpm.E[i,j]-.5*(lpm.v[i,j,1].^2+lpm.v[i,j,2].^2));
     end
 
-    #### MOD5 ####
-    # computing Euler's stage
+    # Computing Euler's stage
     for j in 2:lpm.M-1, i in 2:lpm.N-1
         P0  = lpm.P[i,j];
         PL  = .5*(P0+lpm.P[i-1,j]);
@@ -73,8 +71,7 @@ function step!(lpm::LargeParticleMethod)
         lpm.E_n[i,j]   = lpm.E[i,j]+(PL*UL1-PP*UP1)*lpm.dt/(lpm.dx*lpm.ρ[i,j])+(PN*UN-PV*UV2)*lpm.dt/(lpm.dy*lpm.ρ[i,j]);
     end
 
-    #### MOD2S ####
-    # defining boundary values before Lagrange stage
+    # Defining boundary values before Lagrange stage
     for j in 1:lpm.M
       # left boundary
       lpm.ρ[1,j]     = lpm.ρ[2,j];
@@ -97,7 +94,6 @@ function step!(lpm::LargeParticleMethod)
       lpm.E_n[i,lpm.M]   = lpm.E_n[i,lpm.M-1];
     end
 
-    #### MOD10 ####
     # Lagrange and final stages
     for i in 2:lpm.N-1;
       for j in 2:lpm.M-1;
@@ -108,8 +104,7 @@ function step!(lpm::LargeParticleMethod)
         UP  = .5*(U10+lpm.v_n[i+1,j,1]);
         UN  = .5*(U20+lpm.v_n[i,j-1,2]);
         UV  = .5*(U20+lpm.v_n[i,j+1,2]);
-        # defining direction of the velocity and computing flows 
-        # of mass...
+        # defining direction of the velocity and computing flows of mass...
         # through the left border of the cell
         if UL <= 0.0
            DM1 = UL*ρ0*lpm.dy*lpm.dt;
@@ -149,6 +144,7 @@ function step!(lpm::LargeParticleMethod)
         AM4 = abs(DM4);
         Z1  = lpm.dy*lpm.dx;
         Z2  = (D1-0.5)*AM1+(D2-0.5)*AM+(D3-0.5)*AM3+(D4-0.5)*AM4;
+
         # computing the final value of the density
         lpm.ρ_n[i,j] = ρ0+2.0*Z2/Z1;
         Z3 = ρ0*Z1-(1.0-D1)*AM1-(1.0-D2)*AM-(1.0-D3)*AM3-(1.0-D4)*AM4;
@@ -205,16 +201,13 @@ function run_simulation(N::Integer, M::Integer, dx::AbstractFloat, dt::AbstractF
                               dt  = dt) 
 
     # Intializing fields
-    for j in 1:M, i in 1:N
-        lpm.ρ[i,j]   = 1.0;
-        lpm.v[i,j,1] = 0.0;
-        lpm.v[i,j,2] = 0.0;
-        lpm.P[i,j]   = 1.0;
-        lpm.E[i,j]   = 1.0/((lpm.g-1)*1.0);
-    end
+    lpm.ρ .= 1.0;
+    lpm.v .= 0.0;
+    lpm.P .= 1.0;
+    lpm.E .= 1.0/((lpm.g-1)*1.0);
 
-    # Boom here
-    x_c, y_c = floor(Int, N/2), floor(Int, M/2)
+    # Boom at the center
+    x_c, y_c = floor(Integer, N/2), floor(Integer, M/2)
     lpm.ρ[x_c, y_c] = 15.0
 
     # Run the simulation
