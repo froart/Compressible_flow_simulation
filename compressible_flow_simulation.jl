@@ -174,7 +174,7 @@ function run_simulation(N::Integer, M::Integer, dx::AbstractFloat, dt::AbstractF
 
     GLMakie.activate!()
     # Create plot
-    fig = Figure(size = (700, 600))
+    fig = Figure(size = (700, 500))
     ax  = Axis3(fig[1,1][1,1], width = 500, height = 500, zlabel = "ρ (density)", xlabel = "x", ylabel = "y")
     zlims!(ax, (0.5, 1.5)) 
     # Quit upon ESC key
@@ -214,6 +214,7 @@ function run_simulation(N::Integer, M::Integer, dx::AbstractFloat, dt::AbstractF
     # Run the simulation
     fps = 60
     while !quit[]
+    # record(fig, "compressible_flow_simulation.gif", 1:120) do frame
         display(fig)
         local x, y, ρ = step!(lpm)
         empty!(ax)
